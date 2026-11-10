@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Administra los equipos de tu hogar y conoce una estimación simple de consumo eléctrico.">
+  <title>kwhTrack | Consumo del hogar</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="storage.js" defer></script>
+  <script src="consumption.js" defer></script>
+  <script src="bills.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#inicio" aria-label="kwhTrack, inicio"><span class="brand-icon">⚡</span> kwhTrack</a>
+    <button id="menu-toggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menú</button>
+    <nav id="main-nav" aria-label="Navegación principal">
+      <a href="#inicio">Resumen</a>
+      <a href="#equipos">Equipos</a>
+      <a href="#facturas">Facturas</a>
+      <a href="#agregar">Agregar</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section id="inicio" class="welcome">
+      <div>
+        <p class="eyebrow">TU HOGAR · CONTROL DE ENERGÍA</p>
+        <h1>Un vistazo a tu consumo</h1>
+        <p>Registra tus equipos, consulta su consumo estimado y lleva un registro básico de tus facturas.</p>
+      </div>
+      <a class="button" href="#agregar">+ Agregar equipo</a>
+    </section>
+
+    <section class="summary-grid" aria-label="Resumen del hogar">
+      <article class="summary-card"><span>Equipos activos</span><strong id="device-count">0</strong><small>en tu inventario</small></article>
+      <article class="summary-card"><span>Consumo estimado</span><strong><span id="total-kwh">0</span> <small>kWh/mes</small></strong><small>según horas de uso</small></article>
+      <article class="summary-card"><span>Costo estimado</span><strong id="total-cost">$0</strong><small>con tu tarifa configurada</small></article>
+      <article class="summary-card"><span>Última factura</span><strong id="latest-bill">Sin registros</strong><small id="latest-bill-date">Agrega una factura abajo</small></article>
+    </section>
+
+    <p id="connection-status" class="connection-status" role="status">Conectando con el servidor…</p>
+
+    <section id="equipos" class="panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">INVENTARIO DEL HOGAR</p><h2>Mis equipos</h2></div>
+        <a class="text-link" href="#agregar">+ Añadir equipo</a>
+      </div>
+      <div class="toolbar">
+        <label class="search-label">Buscar equipo<input id="search-input" type="search" placeholder="Ej. nevera" autocomplete="off"></label>
+        <label class="search-label">Ordenar por<select id="sort-select"><option value="name">Nombre</option><option value="consumption">Consumo mensual</option></select></label>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Equipo</th><th>Potencia</th><th>Uso diario</th><th>Consumo / mes</th><th>Acción</th></tr></thead>
+          <tbody id="device-list"></tbody>
+        </table>
+      </div>
+      <p id="empty-message" class="empty-message">Aún no hay equipos. Añade uno para comenzar tu inventario.</p>
+      <p id="no-results" class="empty-message" hidden>No se encontraron equipos con esa búsqueda.</p>
+    </section>
+
+    <section class="two-columns">
+      <section id="agregar" class="panel">
+        <div class="section-heading"><div><p class="eyebrow">INVENTARIO</p><h2>Agregar equipo</h2></div></div>
+        <form id="device-form">
+          <input type="hidden" name="id">
+          <label>Nombre<input name="name" required maxlength="50" placeholder="Ej. Nevera de la cocina"></label>
+          <div class="form-grid">
+            <label>Categoría<select name="category"><option>Nevera</option><option>Aire acondicionado</option><option>Ventilador</option><option>Televisor</option><option>Iluminación</option><option>Computador</option><option>Lavadora</option><option>Otro</option></select></label>
+            <label>Potencia (W)<input name="watts" type="number" required min="1" max="100000" value="150"></label>
+            <label>Horas al día<input name="hours" type="number" required min="0" max="24" step="0.5" value="4"></label>
+            <label>Cantidad<input name="quantity" type="number" required min="1" max="100" step="1" value="1"></label>
+          </div>
+          <p class="hint">Consumo estimado: potencia × horas × 30 días × cantidad.</p>
+          <div class="form-actions"><button class="button" type="submit" id="save-device">Guardar equipo</button><button class="button secondary" type="button" id="cancel-edit" hidden>Cancelar edición</button></div>
+          <p id="form-message" class="message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="facturas" class="panel">
+        <div class="section-heading"><div><p class="eyebrow">SEGUIMIENTO</p><h2>Registrar factura</h2></div></div>
+        <form id="bill-form">
+          <label>Fecha de la factura<input name="date" type="date" required></label>
+          <label>Consumo facturado (kWh)<input name="kwh" type="number" required min="0" step="0.1" placeholder="Ej. 185"></label>
+          <label>Valor pagado (COP)<input name="amount" type="number" required min="0" step="1" placeholder="Ej. 198000"></label>
+          <button class="button" type="submit">Guardar factura</button>
+          <p id="bill-message" class="message" role="status" aria-live="polite"></p>
+        </form>
+        <div class="bill-history"><h3>Facturas recientes</h3><ul id="bill-list"></ul><p id="bill-empty" class="hint">Todavía no hay facturas registradas.</p></div>
+      </section>
+    </section>
+
+    <section class="panel settings-panel">
+      <div><p class="eyebrow">PERSONALIZAR</p><h2>Tarifa de energía</h2><p>Ingresa un valor aproximado de tu factura en COP por kWh para calcular el costo estimado.</p></div>
+      <form id="rate-form" class="rate-form"><label>Tarifa (COP/kWh)<input name="rate" type="number" required min="1" max="100000" step="0.01"></label><button class="button secondary" type="submit">Actualizar tarifa</button><p id="rate-message" class="message" role="status" aria-live="polite"></p></form>
+    </section>
+  </main>
+  <footer class="container">kwhTrack · Estimaciones orientativas para el hogar.</footer>
+</body>
+</html>
