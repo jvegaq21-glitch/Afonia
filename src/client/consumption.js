@@ -1,4 +1,4 @@
-// Reglas de negocio: 30 días por mes y conversión de vatios a kilovatios.
+// Regla de negocio: 30 días por mes y conversión de W a kW.
 function monthlyConsumption(device) {
   return Number(device.watts) * Number(device.hours) * 30 * Number(device.quantity) / 1000;
 }
