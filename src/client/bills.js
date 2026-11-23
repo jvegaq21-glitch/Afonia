@@ -33,5 +33,6 @@ function renderBills(bills) {
 }
 
 function formatDate(value) {
-  return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
-}
+  const dateOnly = String(value).slice(0, 10);
+  return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${dateOnly}T00:00:00Z`));
+} 

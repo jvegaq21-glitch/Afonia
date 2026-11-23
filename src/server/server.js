@@ -10,11 +10,11 @@ const port = Number(process.env.PORT || 3000);
 let pool;
 function db() {
   if (!pool) pool = mysql.createPool({
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'kwhtrack_demo',
+    host: process.env.DB_HOST ?? '127.0.0.1',
+    port: Number(process.env.DB_PORT ?? 3306),
+    user: process.env.DB_USER ?? 'root',
+    password: process.env.DB_PASSWORD ?? '',
+    database: process.env.DB_NAME ?? 'kwhtrack',
     waitForConnections: true, connectionLimit: 5, decimalNumbers: true
   });
   return pool;
@@ -50,7 +50,8 @@ function validBill(v) {
 async function api(req, res, url) {
   if (url.pathname === '/api/health' && req.method === 'GET') {
     try { await db().query('SELECT 1'); return json(res, 200, { status: 'ok', database: 'connected' }); }
-    catch { return json(res, 200, { status: 'ok', database: 'disconnected' }); }
+    catch (err) { console.error('Error MySQL:', err.code, err.message); return json(res, 200, { status: 'ok', database: 'disconnected' }); }
+       
   }
   if (url.pathname === '/api/dashboard' && req.method === 'GET') {
     const pool = db();
@@ -143,7 +144,7 @@ http.createServer(async (req, res) => {
     const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
     const isClientScript = pathname.startsWith('/src/client/');
     const base = isClientScript ? path.join(projectRoot, 'src', 'client') : publicRoot;
-    const relativePath = isClientScript ? pathname.slice('/src/client/'.length) : pathname;
+    const relativePath = isClientScript ? pathname.slice('/src/client'.length) : pathname;
     const target = path.resolve(base, '.' + relativePath);
     if (!target.startsWith(base + path.sep)) return json(res,404,{error:'Archivo no encontrado.'});
     const file = await readFile(target);
